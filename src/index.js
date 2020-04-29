@@ -9,6 +9,8 @@ var path = require("path");
 
 var cookieFilePath = path.join(__dirname, "cookie.txt");
 
+var retryCounter = 0;
+
 function getOptions(type = "init", cookies) {
   if (type === "main") {
     return {
@@ -48,7 +50,8 @@ function getOptions(type = "init", cookies) {
 
 async function fetchCookies() {
   try {
-    const response = await axios(getOptions("init", undefined));
+    const response = await axios(getOptions("init"));
+    //console.log("response",response)
     if (response.headers["set-cookie"]) {
       let setCookies = response.headers["set-cookie"];
       fs.writeFile(cookieFilePath, setCookies, function (err) {
@@ -62,11 +65,29 @@ async function fetchCookies() {
   }
 }
 
+async function loadCookies() {
+  let fileExists;
+  try {
+    fileExists = fs.existsSync(cookieFilePath);
+  } catch (error) {
+    fileExists = false;
+  }
+  if (fileExists) {
+    let cookies = fs.readFileSync(cookieFilePath, { encoding: "utf8" });
+    if (cookies) {
+      return cookies;
+    }
+  }
+  let newCookies = await fetchCookies();
+  return newCookies;
+}
+
 async function main(cookies) {
   try {
     const response = await axios(getOptions("main", cookies));
     let jsonRes = xmlParser.parse(response.data);
     if (jsonRes.response) {
+      retryCounter = 0;
       console.clear();
       bitbar([
         {
@@ -77,9 +98,15 @@ async function main(cookies) {
         },
       ]);
     } else {
-      let newCookies = fetchCookies();
-      if (newCookies) {
-        main(newCookies);
+      if (retryCounter < 5) {
+        retryCounter++;
+        let newCookies = await fetchCookies();
+        if (newCookies) {
+          main(newCookies);
+        }
+      } else {
+        console.debug("Failed to fetch data");
+        process.exit(10);
       }
     }
   } catch (error) {
@@ -88,24 +115,10 @@ async function main(cookies) {
 }
 
 async function init() {
-  let cookies;
-  let fileExists;
-  try {
-    fileExists = fs.existsSync(cookieFilePath);
-  } catch (error) {
-    fileExists = false;
-  }
-  if (fileExists) {
-    cookies = fs.readFileSync(cookieFilePath);
-    if (cookies) {
-      main(cookies);
-      return;
-    }
-  }
-
-  let newCookies = fetchCookies();
-  if (newCookies) {
-    main(newCookies);
+  let cookies = await loadCookies();
+  if (cookies) {
+    main(cookies);
+    return;
   }
 }
 module.exports = init;
