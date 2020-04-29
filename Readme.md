@@ -16,5 +16,11 @@ chmod +x bitbar-huawei-router-status.5s.js
 
 4. Point bitbar to repo directory
 
-
 **PS:** Remove Readme.md & .gitignore after cloning as BitBar will think of them as plugins
+
+
+### Glossary
+- 🔋- Battery Level(1-4)
+- 📶- Signal Strength(1-4)
+- 🚀- 4G
+- 🐢 - 3G or 2G
