@@ -46,12 +46,28 @@ function getOptions(type = "init", cookies) {
   };
 }
 
+async function fetchCookies() {
+  try {
+    const response = await axios(getOptions("init", undefined));
+    if (response.headers["set-cookie"]) {
+      let setCookies = response.headers["set-cookie"];
+      fs.writeFile(cookieFilePath, setCookies, function (err) {
+        if (err) throw err;
+      });
+      return setCookies;
+    }
+  } catch (error) {
+    console.debug(error);
+    process.exit(10);
+  }
+}
+
 async function main(cookies) {
   try {
     const response = await axios(getOptions("main", cookies));
     let jsonRes = xmlParser.parse(response.data);
     if (jsonRes.response) {
-      //console.clear();
+      console.clear();
       bitbar([
         {
           text: `🔋${jsonRes.response.BatteryLevel} 📶${
@@ -60,10 +76,14 @@ async function main(cookies) {
           color: bitbar.darkMode ? "white" : "black",
         },
       ]);
+    } else {
+      let newCookies = fetchCookies();
+      if (newCookies) {
+        main(newCookies);
+      }
     }
   } catch (error) {
     console.debug(error);
-    process.exit(11);
   }
 }
 
@@ -82,18 +102,10 @@ async function init() {
       return;
     }
   }
-  try {
-    const response = await axios(getOptions("init", cookies));
-    if (response.headers["set-cookie"]) {
-      let setCookies = response.headers["set-cookie"];
-      fs.writeFile(cookieFilePath, setCookies, function (err) {
-        if (err) throw err;
-      });
-      main(setCookies);
-    }
-  } catch (error) {
-    console.debug(error);
-    process.exit(10);
+
+  let newCookies = fetchCookies();
+  if (newCookies) {
+    main(newCookies);
   }
 }
 module.exports = init;
