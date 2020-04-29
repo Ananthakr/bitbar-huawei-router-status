@@ -4,10 +4,14 @@
 const axios = require("axios");
 const xmlParser = require("fast-xml-parser");
 const bitbar = require("bitbar");
-var fs = require("fs");
-var path = require("path");
+const fs = require("fs");
+const path = require("path");
 
-var cookieFilePath = path.join(__dirname, "cookie.txt");
+const cookieFilePath = path.join(__dirname, "meta", "cookie.txt");
+
+if (!fs.existsSync(cookieFilePath)) {
+  fs.mkdirSync("meta");
+}
 
 var retryCounter = 0;
 
@@ -121,4 +125,4 @@ async function init() {
     return;
   }
 }
-module.exports = init;
+init();
