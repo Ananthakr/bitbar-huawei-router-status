@@ -10,7 +10,7 @@ const path = require("path");
 const cookieFilePath = path.join(__dirname, "meta", "cookie.txt");
 
 if (!fs.existsSync(cookieFilePath)) {
-  fs.mkdirSync("meta");
+  fs.mkdirSync(path.join(__dirname, "meta"));
 }
 
 var retryCounter = 0;
