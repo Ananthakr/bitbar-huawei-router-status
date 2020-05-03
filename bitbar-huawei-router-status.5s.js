@@ -1,4 +1,15 @@
 #!/usr/bin/env /usr/local/bin/node
+
+/**
+  <bitbar.title>Huawei Router Status</bitbar.title>
+  <bitbar.version>v1.0</bitbar.version>
+  <bitbar.author>Ananthakumar</bitbar.author>
+  <bitbar.author.github>Ananthakr</bitbar.author.github>
+  <bitbar.desc>This plugin shows Airtel Huawei Router(E5573s-606)'s basic status.</bitbar.desc>
+  <bitbar.image>https://imgur.com/a/rTSsjtk</bitbar.image>
+  <bitbar.abouturl>https://github.com/Ananthakr/bitbar-huawei-router-status/blob/master/bitbar-huawei-router-status.5s.js</bitbar.abouturl> 
+*/
+
 "use strict";
 
 const axios = require("axios");
